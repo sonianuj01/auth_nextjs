@@ -1,7 +1,12 @@
-import Image from "next/image";
+import Link from "next/link"
 
 export default function Home() {
   return (
-    <h1>Auth-app</h1>
-  );
+    <>
+    <div>
+      <h1>Welcome to an Authentication application built in nextjs </h1>
+      <Link href='/login'>Visit to login page</Link>
+    </div>
+    </>
+  )
 }
