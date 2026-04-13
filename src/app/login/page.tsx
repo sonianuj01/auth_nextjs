@@ -5,35 +5,41 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-
-
-
-
 export default function LoginPage() {
     const router = useRouter();
+
     const [user, setUser] = React.useState({
         email: "",
         password: "",
+    });
 
-    })
     const [buttonDisabled, setButtonDisabled] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
-
+    const [error, setError] = React.useState("");
 
     const onLogin = async () => {
         try {
             setLoading(true);
+            setError("");
+
             const response = await axios.post("/api/users/login", user);
-            console.log("Login success", response.data);
+
             toast.success("Login success");
             router.push("/profile");
+
         } catch (error: any) {
-            console.log("Login failed", error.message);
-            toast.error(error.message);
+            const message =
+                error.response?.data?.error ||
+                error.response?.data?.message ||
+                "Something went wrong";
+
+            setError(message);
+            toast.error(message);
+
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     const onForgotPassword = async () => {
         try {
@@ -42,7 +48,13 @@ export default function LoginPage() {
             });
             toast.success("Reset email sent");
         } catch (error: any) {
-            toast.error(error.response?.data?.error || "Error");
+            const message =
+                error.response?.data?.error ||
+                error.response?.data?.message ||
+                "Error";
+
+            setError(message);
+            toast.error(message);
         }
     };
 
@@ -56,14 +68,19 @@ export default function LoginPage() {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800 px-4">
-
             <div className="w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-8 space-y-4">
-
+                
                 <h1 className="text-3xl font-bold text-center text-white">
                     {loading ? "Processing..." : "Login"}
                 </h1>
 
                 <hr className="border-gray-600" />
+
+                {error && (
+                    <div className="bg-red-500/20 border border-red-500 text-red-300 text-sm p-3 rounded-lg text-center">
+                        {error}
+                    </div>
+                )}
 
                 <label htmlFor="email" className="text-gray-300 text-sm">Email</label>
                 <input
@@ -87,7 +104,8 @@ export default function LoginPage() {
 
                 <button
                     onClick={onLogin}
-                    className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-black font-semibold rounded-lg transition-all duration-300 shadow-lg hover:scale-[1.02]"
+                    disabled={buttonDisabled || loading}
+                    className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-black font-semibold rounded-lg transition-all duration-300 shadow-lg hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     Login
                 </button>
@@ -108,6 +126,5 @@ export default function LoginPage() {
 
             </div>
         </div>
-    )
-
+    );
 }

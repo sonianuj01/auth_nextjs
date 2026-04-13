@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -18,21 +18,30 @@ export default function SignupPage() {
     const [buttonDisabled, setButtonDisabled] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
 
+    const [error, setError] = useState("");
+
     const onSignup = async () => {
         try {
             setLoading(true);
+            setError("");
+
             const response = await axios.post("/api/users/signup", user);
-            console.log("Signup success", response.data);
+
             router.push("/login");
 
         } catch (error: any) {
-            console.log("Signup failed", error.message);
+            const message =
+                error.response?.data?.error ||
+                error.response?.data?.message ||
+                "Something went wrong";
 
-            toast.error(error.message);
+            setError(message);
+            toast.error(message);
+
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     useEffect(() => {
         if (user.email.length > 0 && user.password.length > 0 && user.username.length > 0) {
@@ -53,6 +62,12 @@ export default function SignupPage() {
                 </h1>
 
                 <hr className="border-gray-600" />
+
+                {error && (
+                    <div className="bg-red-500/20 border border-red-500 text-red-300 text-sm p-3 rounded-lg text-center">
+                        {error}
+                    </div>
+                )}
 
                 <label htmlFor="username" className="text-gray-300 text-sm">Username</label>
                 <input
